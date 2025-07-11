@@ -2152,6 +2152,74 @@ const AttendanceHistoryTab: React.FC<{
     return `${day}/${month}/${year}`;
   };
 
+  // Fungsi untuk memfilter data yang berisi formula
+  const filterNonFormulaData = (
+    data: AttendanceHistory[]
+  ): AttendanceHistory[] => {
+    return data.filter((record) => {
+      // Filter berdasarkan beberapa kondisi untuk menghindari formula
+      const hasValidTanggal =
+        record.tanggal &&
+        !record.tanggal.toString().startsWith("=") &&
+        record.tanggal.toString().trim() !== "" &&
+        record.tanggal.toString() !== "#N/A" &&
+        record.tanggal.toString() !== "#REF!" &&
+        record.tanggal.toString() !== "#VALUE!" &&
+        record.tanggal.toString() !== "#ERROR!" &&
+        !record.tanggal.toString().includes("FORMULA");
+
+      const hasValidNama =
+        record.nama &&
+        !record.nama.toString().startsWith("=") &&
+        record.nama.toString().trim() !== "" &&
+        record.nama.toString() !== "#N/A" &&
+        record.nama.toString() !== "#REF!" &&
+        record.nama.toString() !== "#VALUE!" &&
+        record.nama.toString() !== "#ERROR!" &&
+        !record.nama.toString().includes("FORMULA");
+
+      const hasValidNisn =
+        record.nisn &&
+        !record.nisn.toString().startsWith("=") &&
+        record.nisn.toString().trim() !== "" &&
+        record.nisn.toString() !== "#N/A" &&
+        record.nisn.toString() !== "#REF!" &&
+        record.nisn.toString() !== "#VALUE!" &&
+        record.nisn.toString() !== "#ERROR!" &&
+        !record.nisn.toString().includes("FORMULA");
+
+      const hasValidKelas =
+        record.kelas &&
+        !record.kelas.toString().startsWith("=") &&
+        record.kelas.toString().trim() !== "" &&
+        record.kelas.toString() !== "#N/A" &&
+        record.kelas.toString() !== "#REF!" &&
+        record.kelas.toString() !== "#VALUE!" &&
+        record.kelas.toString() !== "#ERROR!" &&
+        !record.kelas.toString().includes("FORMULA");
+
+      const hasValidStatus =
+        record.status &&
+        !record.status.toString().startsWith("=") &&
+        record.status.toString().trim() !== "" &&
+        record.status.toString() !== "#N/A" &&
+        record.status.toString() !== "#REF!" &&
+        record.status.toString() !== "#VALUE!" &&
+        record.status.toString() !== "#ERROR!" &&
+        !record.status.toString().includes("FORMULA") &&
+        ["Hadir", "Izin", "Sakit", "Alpha"].includes(record.status.toString());
+
+      // Hanya tampilkan record yang memiliki semua field valid
+      return (
+        hasValidTanggal &&
+        hasValidNama &&
+        hasValidNisn &&
+        hasValidKelas &&
+        hasValidStatus
+      );
+    });
+  };
+
   useEffect(() => {
     setLoading(true);
     fetch(`${endpoint}?action=attendanceHistory`)
@@ -2162,7 +2230,10 @@ const AttendanceHistoryTab: React.FC<{
       .then((data) => {
         if (data.success) {
           const newData = data.data || [];
-          const updatedData = newData.map((record: AttendanceHistory) => {
+          // Filter data yang berisi formula sebelum memproses
+          const filteredData = filterNonFormulaData(newData);
+
+          const updatedData = filteredData.map((record: AttendanceHistory) => {
             const key = `${record.tanggal}_${record.nisn}`;
             return {
               ...record,
@@ -3370,7 +3441,7 @@ const SplashScreen: React.FC = () => {
         className="w-52 h-70 mb-4 animate-pulse-custom" //Pengaturan ukuran logo
       />
       <p className="text-gray-800 text-lg font-semibold mt-6">
-        masih percobaan
+        Tunggu Sebentar
       </p>
     </div>
   );
